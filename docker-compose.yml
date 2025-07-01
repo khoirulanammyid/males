@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  # Layanan Backend (API)
+  backend:
+    build: ./backend # Direktori tempat Dockerfile backend berada
+    container_name: corrupt_file_api
+    ports:
+      - "5001:5000" # Memetakan port 5001 di host ke port 5000 di kontainer
+    volumes:
+      - ./backend:/app # Sinkronisasi kode lokal dengan kontainer untuk development
+    environment:
+      - FLASK_ENV=development
+
+  # Layanan Frontend (Web Server)
+  frontend:
+    build: ./frontend # Direktori tempat Dockerfile frontend berada
+    container_name: corrupt_file_web
+    ports:
+      - "8080:80" # Memetakan port 8080 di host ke port 80 di kontainer
+    depends_on:
+      - backend # Memastikan backend dimulai sebelum frontend
