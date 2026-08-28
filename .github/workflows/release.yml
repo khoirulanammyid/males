@@ -11,10 +11,6 @@ on:
         required: true
         default: v0.1.0
 
-defaults:
-  run:
-    working-directory: males-rust
-
 jobs:
   build:
     name: Build (${{ matrix.os }})
@@ -22,6 +18,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+    defaults:
+      run:
+        working-directory: males-rust
     steps:
       - uses: actions/checkout@v4
 
@@ -55,11 +54,15 @@ jobs:
 
       - name: Rename binaries
         run: |
-          mv dist/binary-ubuntu-latest/males-rust dist/males-rust-linux
-          chmod +x dist/males-rust-linux
-          mv dist/binary-macos-latest/males-rust dist/males-rust-macos
-          chmod +x dist/males-rust-macos
-          mv dist/binary-windows-latest/males-rust.exe dist/males-rust-windows.exe
+          RELEASE_NAME="${{ github.event.inputs.tag || github.ref_name }}"
+          mv dist/binary-ubuntu-latest/males-rust \
+             "dist/males-rust-${RELEASE_NAME}-linux"
+          chmod +x "dist/males-rust-${RELEASE_NAME}-linux"
+          mv dist/binary-macos-latest/males-rust \
+             "dist/males-rust-${RELEASE_NAME}-macos"
+          chmod +x "dist/males-rust-${RELEASE_NAME}-macos"
+          mv dist/binary-windows-latest/males-rust.exe \
+             "dist/males-rust-${RELEASE_NAME}-windows.exe"
 
       - name: Create GitHub Release
         env:
