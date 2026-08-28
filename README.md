@@ -1,25 +1,41 @@
 # Corrupt File Generator
 
-This script is used to create corrupt files with user-specified sizes and formats.
+**males** is a simple tool for generating corrupt (dummy) files with a user-specified
+name, format, and size. It fills files with random data and, where the format is known,
+prepends the correct magic bytes so the file is recognized by tools such as `file`.
 
 ## Features
 
-- Customizable: Create files with a specified name, format, and size.
-- Random Data: Uses random data from `/dev/urandom` to ensure the file is corrupt.
-- Multi-language: Available in both Bash and Python versions.
-  
+- **Customizable:** Create files with a specified name, format, and size.
+- **Format signatures:** Known formats are stamped with their correct magic bytes
+  (`mp4`, `mkv`, `mp3`, `wav`, `jpg`/`jpeg`, `png`, `gif`, `webp`, `pdf`, `zip`,
+  `docx`, `xlsx`, `rar`, `7z`).
+- **Multi-interface:** Available as Bash, Python, and Rust command-line tools, plus a
+  web application.
+- **Cross-platform (Rust):** Uses a self-contained xorshift pseudo-random generator
+  instead of `/dev/urandom`, so it builds and runs on Linux, macOS, and Windows.
+
+## Implementations
+
+| Interface | Language | Location |
+|-----------|----------|----------|
+| CLI | Rust | `males-rust/` |
+| CLI | Python | `males.py` |
+| CLI | Bash | `males.sh` |
+| Web app | Flask + HTML/JS | `backend/`, `frontend/`, `docker-compose.yml` |
+
 ## Installation
 
-1. **Clone Repository:**
-
-   Clone this repository to your local directory.
+1. **Clone the repository:**
 
    ```bash
    git clone https://github.com/jonyxz/males.git
    cd males
    ```
-   
-2. **For Python Version:** If you haven't installed Python yet, make sure to install it:
+
+2. **(Rust) Install Rust** by following the instructions at <https://rustup.rs>.
+
+3. **(Python) Install Python** (e.g., on Arch Linux):
 
    ```bash
    sudo pacman -S python
@@ -27,26 +43,62 @@ This script is used to create corrupt files with user-specified sizes and format
 
 ## Usage
 
-  * How to run the Bash script:
+### Rust (Recommended)
 
-     ```bash
-     chmod +x males.sh
-     ./males.sh
-     ```
-     
-  * How to run the Python script:
+Build and run:
 
-    ```bash
-    python males.py
-    ```
+```bash
+cd males-rust
+cargo run --release
+```
+
+The program prompts for a file name, a format, and a size:
+
+```text
+Nama file (tanpa ekstensi): dummy
+Format (mp4, mkv, mp3, wav, jpg, jpeg, png, gif, webp, pdf, zip, docx, xlsx, rar, 7z): pdf
+Ukuran (contoh: 5M, 10K, 100): 5M
+```
+
+- **Format:** any of the supported extensions listed in the prompt. Unknown extensions
+  still produce a file, just without magic bytes.
+- **Size:** accepts plain bytes (`100`) or suffixes in multiples of 1024 — `K`
+  (KiB), `M` (MiB), `G` (GiB).
+
+### Python
+
+```bash
+python males.py
+```
+
+### Bash
+
+```bash
+chmod +x males.sh
+./males.sh
+```
+
+### Web App
+
+Run the frontend and backend with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+- Frontend: <http://localhost:8080>
+- Backend API: <http://localhost:5001>
 
 ## Conclusion
 
-This Corrupt File Generator is a simple yet useful tool to quickly create corrupt files for testing or experimentation. Whether you're using Bash or Python, you can easily generate files with random data in any format and size. We hope this tool is helpful for your needs, and feel free to contribute or provide feedback to improve it further.
+This Corrupt File Generator is a simple yet useful tool to quickly create corrupt files
+for testing or experimentation. With CLI tools in Bash, Python, and Rust — plus a
+browser-based web app — you can easily generate files with random data in any format and
+size. We hope this tool is helpful for your needs, and feel free to contribute or provide
+feedback to improve it further.
 
 Thank you for using this tool, and happy coding!
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
