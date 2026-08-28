@@ -31,6 +31,10 @@ jobs:
       - name: Build release binary
         run: cargo build --release --locked
 
+      - name: Ad-hoc codesign (macOS)
+        if: runner.os == 'macOS'
+        run: codesign --force --deep --sign - target/release/males-rust
+
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
