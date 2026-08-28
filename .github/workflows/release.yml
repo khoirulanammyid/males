@@ -1,0 +1,69 @@
+name: Release Rust
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag/name (e.g. v1.0.0)
+        required: true
+        default: v0.1.0
+
+defaults:
+  run:
+    working-directory: males-rust
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build release binary
+        run: cargo build --release --locked
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.os }}
+          path: target/release/males-rust*
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Rename binaries
+        run: |
+          mv dist/binary-ubuntu-latest/males-rust dist/males-rust-linux
+          chmod +x dist/males-rust-linux
+          mv dist/binary-macos-latest/males-rust dist/males-rust-macos
+          chmod +x dist/males-rust-macos
+          mv dist/binary-windows-latest/males-rust.exe dist/males-rust-windows.exe
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RELEASE_NAME="${{ github.event.inputs.tag || github.ref_name }}"
+          gh release create "$RELEASE_NAME" dist/males-rust-* --generate-notes
